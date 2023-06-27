@@ -4,12 +4,14 @@ pragma solidity >=0.5.0 <0.9.0;
 contract product {
     struct productDetails {
         address manufacturer;
-        uint ProductLicense;
-        uint date;
+        string ProductCategorie;
+        uint SerialNumber;
+        string date;
         uint price;
         uint prodId;
         string pStatus;
     }
+    productDetails[] memos;
 
     mapping(uint => productDetails) public products;
     mapping(uint => bool) public vProducts;
@@ -19,8 +21,9 @@ contract product {
     //bytes32[] owners;
 
     function registerProducts(
-        uint ProductLicense,
-        uint date,
+        string memory ProductCategorie,
+        uint SerialNumber,
+        string memory date,
         uint price,
         uint prodId
     ) external {
@@ -28,13 +31,29 @@ contract product {
         vProducts[prodId] = true;
         products[nextId] = productDetails(
             msg.sender,
-            ProductLicense,
+            ProductCategorie,
+            SerialNumber,
             date,
             price,
             prodId,
             "Available"
         );
+        memos.push(
+            productDetails(
+                msg.sender,
+                ProductCategorie,
+                SerialNumber,
+                date,
+                price,
+                prodId,
+                "Available"
+            )
+        );
         nextId++;
+    }
+
+    function getMemos() public view returns (productDetails[] memory) {
+        return memos;
     }
 
     function sellProduct(uint sProductId) public {
@@ -59,6 +78,8 @@ contract product {
         }
     }
 
+    productDetails public notReg;
+
     function verifyFakeness(
         uint vProductId
     ) public view returns (productDetails memory, string memory) {
@@ -82,7 +103,7 @@ contract product {
             ) return (products[j], "Original");
             else return (products[j], "Fake");
         } else {
-            return (products[j], "Fake");
+            return (notReg, "Fake");
         }
     }
 }
